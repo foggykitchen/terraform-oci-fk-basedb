@@ -1,0 +1,3 @@
+#cloud-config
+runcmd:
+  - [bash, -c, 'set -eu; for attempt in 1 2 3; do if dnf -y --disablerepo="*" --enablerepo=ol9_baseos_latest --enablerepo=ol9_appstream install nmap-ncat; then exit 0; fi; sleep 10; done; exit 1']

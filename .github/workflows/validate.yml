@@ -1,0 +1,27 @@
+name: Validate
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: opentofu/setup-opentofu@v1
+        with:
+          tofu_version: 1.11.6
+      - run: tofu fmt -recursive -check
+      - run: tofu init -backend=false -input=false
+      - run: tofu validate
+      - run: tofu test
+      - name: Validate examples
+        shell: bash
+        run: |
+          set -euo pipefail
+          for example in examples/[0-9]*/; do
+            tofu -chdir="$example" init -backend=false -input=false
+            tofu -chdir="$example" validate
+            tofu -chdir="$example" test
+          done

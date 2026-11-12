@@ -1,0 +1,10 @@
+tenancy_ocid = "ocid1.tenancy.oc1..replace_me"
+parent_compartment_id = "ocid1.compartment.oc1..replace_me"
+primary_region = "eu-frankfurt-1"
+admin_cidr = "203.0.113.10/32" # Replace with your real trusted public IP.
+database_version = "23.26.4.0.0" # Verify 26ai RU availability in your region.
+database_shape = "VM.BaseDB.x86"
+database_ecpus = 4
+# Optional: omit to generate a lab SSH keypair stored in state.
+# ssh_public_keys = ["ssh-ed25519 REPLACE_WITH_YOUR_PUBLIC_KEY"]
+# Supply TF_VAR_admin_password securely; no database password is committed.
