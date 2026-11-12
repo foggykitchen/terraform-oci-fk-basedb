@@ -179,6 +179,3 @@ Licensed under the **Universal Permissive License (UPL), Version 1.0**. See [LIC
 
 © 2026 [FoggyKitchen.com](https://foggykitchen.com) - Cloud. Code. Clarity.
 
-### ECPU validation (2026-11-09)
-
-OCI 9.12.1: 11 root mock tests cover legacy OCPU behavior, ECPU primary/standby sizing, required LVM storage for ECPU primary systems and invalid ECPU configuration rejection. ECPU standby is tested offline only; live Data Guard deployment has not been verified. The three example compositions have 7 additional tests.
