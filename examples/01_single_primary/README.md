@@ -65,7 +65,6 @@ cloud-init.yaml           Install nmap-ncat on the validation host(s)
 variables.tf              Authentication context, placement and database inputs
 outputs.tf                IPs, IDs, connection strings and connectivity IDs
 terraform.tfvars.example  Input template to copy and customize
-tests/                    Offline mocked-provider topology tests
 ```
 
 Module calls are separated by service. There is no all-in-one `main.tf` in this example.
@@ -84,7 +83,7 @@ BaseDB, bastion compute, NAT and storage incur charges. The compartment is retai
 
 ### Current BaseDB provisioning boundary
 
-This example uses VM.BaseDB.x86 with 4 ECPUs, LVM storage and OCI provider 9.12.1. Oracle has [announced retirement of OCPU-metered SKUs and Enterprise Edition Extreme Performance for new provisioning](https://docs.oracle.com/en/cloud/paas/base-database/about/index.html), effective July 31, 2026. Confirm which shapes, editions and billing model your tenancy can provision before a live apply. Passing offline tests does not establish live provisioning availability. All three examples now use ECPU-based VM.BaseDB.x86 systems; review each example’s inputs and recorded deployment results.
+This example uses VM.BaseDB.x86 with 4 ECPUs, LVM storage and OCI provider 9.12.1. Oracle has [announced retirement of OCPU-metered SKUs and Enterprise Edition Extreme Performance for new provisioning](https://docs.oracle.com/en/cloud/paas/base-database/about/index.html), effective July 31, 2026. Confirm which shapes, editions and billing model your tenancy can provision before a live apply. Passing configuration validation does not establish live provisioning availability. All three examples now use ECPU-based VM.BaseDB.x86 systems; review each example’s inputs and recorded deployment results.
 
 ---
 
@@ -281,10 +280,9 @@ Captured from the verified example 01 deployment on 2026-11-09. The architecture
 ```sh
 tofu init -backend=false
 tofu validate
-tofu test
 ```
 
-Tests mock OCI providers and do not create infrastructure. They check module composition and outputs, including rejection of public SSH. They do not prove OCI regional capacity, network connectivity, licensing or successful database provisioning.
+Initialization downloads the required modules and providers. Validation checks configuration without creating infrastructure. Verify regional capacity, network connectivity and database behavior separately using the runtime checks in the example README.
 
 ---
 

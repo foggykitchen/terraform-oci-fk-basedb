@@ -87,7 +87,6 @@ cloud-init.yaml           Install nmap-ncat on the validation host(s)
 variables.tf              Authentication context, placement and database inputs
 outputs.tf                IPs, IDs, connection strings and connectivity IDs
 terraform.tfvars.example  Input template to copy and customize
-tests/                    Offline mocked-provider topology tests
 ```
 
 Module calls are separated by service. There is no all-in-one `main.tf` in this example.
@@ -106,7 +105,7 @@ BaseDB, bastion compute, NAT and storage incur charges. The compartment is retai
 
 ### Current BaseDB provisioning boundary
 
-This example uses VM.BaseDB.x86 with 4 ECPUs per DB system and Enterprise Edition. The primary uses LVM; Data Guard creates the standby from the primary configuration. Active Data Guard is disabled. Oracle has [announced retirement of OCPU-metered SKUs and Enterprise Edition Extreme Performance for new provisioning](https://docs.oracle.com/en/cloud/paas/base-database/about/index.html), effective July 31, 2026. Confirm which shapes, editions and billing model your tenancy can provision before a live apply. Passing offline tests does not establish live Data Guard availability. ECPU inputs are configured for both primary and standby with OCI 9.12.1. Live Data Guard deployment was verified on 2026-11-09; see the recorded results below.
+This example uses VM.BaseDB.x86 with 4 ECPUs per DB system and Enterprise Edition. The primary uses LVM; Data Guard creates the standby from the primary configuration. Active Data Guard is disabled. Oracle has [announced retirement of OCPU-metered SKUs and Enterprise Edition Extreme Performance for new provisioning](https://docs.oracle.com/en/cloud/paas/base-database/about/index.html), effective July 31, 2026. Confirm which shapes, editions and billing model your tenancy can provision before a live apply. Passing configuration validation does not establish live Data Guard availability. ECPU inputs are configured for both primary and standby with OCI 9.12.1. Live Data Guard deployment was verified on 2026-11-09; see the recorded results below.
 
 ---
 
@@ -199,7 +198,7 @@ Live deployment and runtime checks completed on **2026-11-09**; the environment 
 | Standby role and PDB | PASS | FOGGYDB PHYSICAL STANDBY / MOUNTED; FKPDB1 MOUNTED. |
 | SQL replication lag | PASS | Standby v$dataguard_stats: transport lag and apply lag both +00 00:00:00. |
 | Post-apply plan | PASS | No changes. Your infrastructure matches the configuration. |
-| Offline validation | PASS | tofu validate and format check succeeded; all 3 example composition tests passed. |
+| Offline validation | PASS | tofu validate and format check succeeded. |
 
 SQL checks ran through the bastion using local OS authentication (`sudo -iu oracle sqlplus -s / as sysdba`). Password-based application login, switchover, failover and a dedicated test transaction were not tested. Zero lag is a point-in-time observation.
 
@@ -305,10 +304,9 @@ The console banners reflect this lab configuration: automatic backups are disabl
 ```sh
 tofu init -backend=false
 tofu validate
-tofu test
 ```
 
-Tests mock OCI providers and do not create infrastructure. They check module composition and outputs, including rejection of public SSH. They do not prove OCI regional capacity, network connectivity, licensing or successful database provisioning.
+Initialization downloads the required modules and providers. Validation checks configuration without creating infrastructure. Verify regional capacity, network connectivity and database behavior separately using the runtime checks in the example README.
 
 ---
 

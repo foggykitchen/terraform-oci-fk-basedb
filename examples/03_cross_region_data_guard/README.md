@@ -111,7 +111,6 @@ cloud-init.yaml           Install nmap-ncat on the validation host(s)
 variables.tf              Authentication context, placement and database inputs
 outputs.tf                IPs, IDs, connection strings and connectivity IDs
 terraform.tfvars.example  Input template to copy and customize
-tests/                    Offline mocked-provider topology tests
 ```
 
 Module calls are separated by service and region. DRG and RPC resources are configured through the DRG module, keeping ownership inside that module. There is no all-in-one `main.tf` in this example.
@@ -237,7 +236,7 @@ Live deployment and runtime checks completed on **2026-11-12**, using OCI **9.12
 | SQL transport/apply lag | PASS | Both +00 00:00:00 at 11:16:32 UTC; source datum time 11:16:31 UTC. |
 | Redo receive/apply | PASS | RFS RECEIVING and MRP0 APPLYING_LOG, thread 1, sequence 8. |
 | Post-apply plan | PASS | No changes. Your infrastructure matches the configuration. |
-| Offline validation | PASS | tofu validate and all 4 example mock tests passed before apply. |
+| Offline validation | PASS | tofu validate passed before deployment. |
 
 The first apply returned transient-looking 404 errors for DRG/VCN creation and empty image discovery after creating the compartment. A later read confirmed Frankfurt and Amsterdam subscriptions were READY and images were available in both regions; the resumed apply succeeded without configuration changes. Compartment propagation is a possible cause, not a confirmed diagnosis. The example's region-subscription data source filters for `is_home_region = true`; its output is not the full subscription list.
 
@@ -382,12 +381,11 @@ Captured from the example 03 deployment on **2026-11-12**. Screenshots document 
 ```sh
 tofu init -backend=false
 tofu validate
-tofu test
 ```
 
-Offline validation completed on **2026-11-09** with OCI **9.12.1** and TLS **4.4.2**, using local dependency overrides at the time: initialization, `tofu validate` and recursive formatting checks succeeded; **4 tests passed, 0 failed**. Tests cover cross-region composition/provider discovery and DRG/RPC outputs, rejection of public SSH, rejection of identical regions, and generation of the shared lab SSH key.
+Offline validation completed on **2026-11-09** with OCI **9.12.1** and TLS **4.4.2**, using local dependency overrides at the time: initialization, `tofu validate` and recursive formatting checks succeeded.
 
-Tests mock OCI and TLS providers and do not create infrastructure. They do not prove OCI regional capacity, actual peering, network connectivity, licensing or successful database provisioning.
+Initialization downloads the required modules and providers. Validation checks configuration without creating infrastructure. Verify regional capacity, network connectivity and database behavior separately using the runtime checks in the example README.
 
 ---
 

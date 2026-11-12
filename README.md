@@ -31,7 +31,6 @@ outputs.tf          Common target database outputs
 datasources.tf      Target-region database and node discovery
 versions.tf         Provider requirements and alias contract
 examples/           Primary, same-region and cross-region examples
-tests/              Offline mocked-provider module tests
 SUPPORT.md          FoggyKitchen support policy
 LICENSE             UPL 1.0
 ```
@@ -86,7 +85,7 @@ A standby inherits the primary database definition, SSH keys and compartment. Su
 
 ## 📋 Requirements
 
-OpenTofu >= 1.8.0, OCI provider >= 9.12.1 and < 10.0.0, valid OCI authentication, IAM and BaseDB quotas. Offline tests use OpenTofu >= 1.11 with mocked providers. The root module has been validated with OCI 9.12.1. The examples pin provider-compatible releases: VCN v0.2.1, compartment v0.1.1 and DRG v0.4.1. All three examples passed initialization, validation and read-only plans with OCI 9.12.1 on 2026-11-12 without local dependency overrides. No infrastructure was created by these checks. BaseDB provisioning and deletion may take significant time. No live apply is performed by repository validation.
+OpenTofu >= 1.8.0, OCI provider >= 9.12.1 and < 10.0.0, valid OCI authentication, IAM and BaseDB quotas. The root module has been validated with OCI 9.12.1. The examples pin provider-compatible releases: VCN v0.2.1, compartment v0.1.1 and DRG v0.4.1. All three examples passed initialization, validation and read-only plans with OCI 9.12.1 on 2026-11-12 without local dependency overrides. No infrastructure was created by these checks. BaseDB provisioning and deletion may take significant time. No live apply is performed by repository validation.
 
 The SYS password is required and sensitive; it has no default. Supply it securely at runtime. It can still be present in state and saved plans. Keep these artifacts private. Use existing [VCN](https://github.com/foggykitchen/terraform-oci-fk-vcn) and [NSG](https://github.com/foggykitchen/terraform-oci-fk-nsg) modules for network composition.
 
@@ -95,7 +94,7 @@ The SYS password is required and sensitive; it has no default. Supply it securel
 
 ### Current BaseDB provisioning boundary
 
-These examples still use the legacy OCPU inputs from the course. Oracle has [announced retirement of OCPU-metered SKUs and Enterprise Edition Extreme Performance for new provisioning](https://docs.oracle.com/en/cloud/paas/base-database/about/index.html), effective July 31, 2026. Confirm which shapes, editions and billing model your tenancy can provision before a live apply. Passing offline tests does not establish availability of this legacy path. Example 01 now uses VM.BaseDB.x86 with 4 ECPUs. ECPU primary systems explicitly use LVM storage, as required by the launch API. Examples 02 and 03 retain legacy database defaults and require a separate live Data Guard compatibility review.
+These examples still use the legacy OCPU inputs from the course. Oracle has [announced retirement of OCPU-metered SKUs and Enterprise Edition Extreme Performance for new provisioning](https://docs.oracle.com/en/cloud/paas/base-database/about/index.html), effective July 31, 2026. Confirm which shapes, editions and billing model your tenancy can provision before a live apply. Passing configuration validation does not establish availability of this legacy path. Example 01 now uses VM.BaseDB.x86 with 4 ECPUs. ECPU primary systems explicitly use LVM storage, as required by the launch API. Examples 02 and 03 retain legacy database defaults and require a separate live Data Guard compatibility review.
 
 ## 📥 Inputs
 
@@ -158,14 +157,10 @@ These examples still use the legacy OCPU inputs from the course. Oracle has [ann
 tofu fmt -recursive -check
 tofu init -backend=false
 tofu validate
-tofu test
 ```
 
-Root module validation on **2026-11-09** with OCI provider **9.12.1** passed, including **7 offline tests**. All three examples also passed validation and their 7 mock tests with OCI 9.12.1 and local dependency overrides. A read-only plan against the existing example 01 infrastructure showed 1 resource to add (the missing database), 0 changes and 0 destroys; the example has since been updated to ECPU; live provisioning results are recorded separately. Example 01 was subsequently deployed successfully on 2026-11-09 with 26ai 23.26.4.0.0, VM.BaseDB.x86, 4 ECPUs and LVM. Both DB system and database reached AVAILABLE; private listener connectivity, SSH and local SQL*Plus checks passed. FOGGYDB and FKPDB1 are READ WRITE. See the example README for details and limitations.
+Root module validation with OCI provider **9.12.1** passed. Example 01 was subsequently deployed successfully on 2026-11-09 with 26ai 23.26.4.0.0, VM.BaseDB.x86, 4 ECPUs and LVM. Both DB system and database reached AVAILABLE; private listener connectivity, SSH and local SQL*Plus checks passed. FOGGYDB and FKPDB1 are READ WRITE. See the example README for details and limitations.
 
-Historical validation on **2026-11-02** with OpenTofu **1.11.6** and OCI provider **6.37.0**: root module plus all three examples passed validation, and **14 offline tests passed** (7 module tests and 7 example tests). Root module tests cover primary/standby behavior; example tests cover full module composition, trusted SSH boundaries and distinct region enforcement. That historical run performed no live OCI deployment.
-
-See [tests](tests/README.md) for coverage and limits. Validate each example independently before configuring real inputs. Live tests must verify `AVAILABLE` state, private SQL connectivity and, for standby, Data Guard transport/apply health. Mock tests cannot establish OCI quota, version availability, licensing, region support or network connectivity.
 
 ## 🆘 Support
 

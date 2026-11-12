@@ -50,7 +50,6 @@ Each directory contains:
 - A README with architecture, inputs, outputs, deployment and verification steps.
 - A `terraform.tfvars.example` input template.
 - A `cloud-init.yaml` payload that installs `nmap-ncat` on the bastion.
-- Mocked-provider tests under `tests/`.
 
 From the repository root, select **one** example:
 
@@ -84,12 +83,10 @@ Run these commands separately in each example directory:
 ```sh
 tofu init -backend=false
 tofu validate
-tofu test
 ```
 
-Tests mock the OCI providers and create no infrastructure. Initialization still downloads providers and modules. The tests check module composition and input validation, including trusted SSH CIDRs and distinct regions for example 03. They do not verify live OCI capacity, provisioning, network connectivity or Data Guard health.
+Initialization downloads the required modules and providers. Validation checks configuration without creating infrastructure. Verify regional capacity, network connectivity and database behavior separately using the runtime checks in the example README.
 
-See the [test coverage and limitations](../tests/README.md). Live deployment results must be checked separately using the instructions in each example.
 
 ---
 
