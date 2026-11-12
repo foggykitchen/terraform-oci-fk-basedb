@@ -138,11 +138,3 @@ See [LICENSE](../LICENSE) for details.
 ---
 
 © 2026 [FoggyKitchen.com](https://foggykitchen.com) - Cloud. Code. Clarity.
-
-## Provider compatibility verification
-
-The examples pin VCN **v0.2.1**, compartment **v0.1.1**, and DRG **v0.4.1** (example 03). These releases allow OCI `>= 6.0.0, < 10.0.0`; the BaseDB examples explicitly require `>= 9.12.1, < 10.0.0`. No sibling checkouts or `local_dependencies_override.tf` files are required. Disable old local overrides before initializing so that the published tags are actually used.
-
-On **2026-11-12**, all three examples passed `tofu init -backend=false`, `tofu validate` and read-only `tofu plan` in isolated copies with published dependencies, OCI **9.12.1**, and TLS **4.4.2**. Plans used fresh local state and existing lab inputs; they are composition checks, not drift checks against an active deployment. No apply or destroy was run for this verification.
-
-Older examples elsewhere in the FoggyKitchen ecosystem retain explicit OCI 6.x constraints. Support for OCI 9.x in a reusable dependency does not authorize upgrading every caller. Module Git sources are pinned to tags or immutable commits; provider lock files should be reviewed when deliberately changing provider versions.
