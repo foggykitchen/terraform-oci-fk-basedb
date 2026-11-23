@@ -25,6 +25,10 @@ resource "oci_database_data_guard_association" "this" {
   delete_standby_db_home_on_delete = var.delete_standby_db_home_on_delete
   lifecycle {
     precondition {
+      condition     = var.kms_key_id == null && var.vault_id == null && var.kms_key_version_id == null
+      error_message = "CMK inputs are PRIMARY-only. Data Guard uses the primary key (its replica for cross-region); configure Vault replication and IAM before creating standby."
+    }
+    precondition {
       condition     = var.compute_model == "ECPU" ? try(var.compute_count >= 4 && var.compute_count % 4 == 0 && var.shape == "VM.BaseDB.x86", false) : var.compute_count == null && var.shape != "VM.BaseDB.x86"
       error_message = "ECPU requires VM.BaseDB.x86 and compute_count >= 4 in multiples of 4; OCPU requires a legacy shape and no compute_count."
     }

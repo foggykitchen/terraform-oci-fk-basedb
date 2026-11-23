@@ -110,7 +110,7 @@ tofu plan -destroy
 tofu destroy
 ```
 
-Copy any required database data first. Destroy deletes the lab databases and infrastructure. In examples 02 and 03, deleting the Data Guard association also deletes the standby DB Home/system. The child compartment is retained because `enable_delete = false`.
+Copy any required database data first. Destroy deletes the lab databases and infrastructure. In examples 02 and 03, deleting the Data Guard association attempts to terminate the standby DB system; verify its actual lifecycle. The child compartment is retained because `enable_delete = false`.
 
 ---
 

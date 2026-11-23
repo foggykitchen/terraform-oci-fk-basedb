@@ -31,12 +31,15 @@ resource "oci_database_db_system" "this" {
     db_version   = var.database_version
     display_name = var.db_home_display_name
     database {
-      admin_password = var.admin_password
-      db_name        = var.database_name
-      pdb_name       = var.pdb_name
-      character_set  = var.character_set
-      ncharacter_set = var.ncharacter_set
-      db_workload    = var.database_workload
+      admin_password     = var.admin_password
+      db_name            = var.database_name
+      pdb_name           = var.pdb_name
+      character_set      = var.character_set
+      ncharacter_set     = var.ncharacter_set
+      db_workload        = var.database_workload
+      kms_key_id         = var.kms_key_id
+      vault_id           = var.vault_id
+      kms_key_version_id = var.kms_key_version_id
       db_backup_config {
         auto_backup_enabled = var.auto_backup_enabled
       }

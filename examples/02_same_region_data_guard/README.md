@@ -59,13 +59,13 @@ The Data Guard rules follow [Oracle BaseDB Data Guard prerequisites](https://doc
 
 | Module | Release | Purpose |
 |---|---|---|
-| `terraform-oci-fk-compartment` | v0.1.1 | Child compartment in the tenancy home region |
-| `terraform-oci-fk-vcn` | v0.2.1 | VCN, subnets, route tables, IGW, NAT and SGW |
-| `terraform-oci-fk-nsg` | v0.1.0 | Bastion, database and Data Guard security policy |
-| `terraform-oci-fk-compute` | v0.2.2 | OL9 bastion, 1 OCPU and 8 GB RAM |
+| `terraform-oci-fk-compartment` | v0.2.0 | Child compartment in the tenancy home region |
+| `terraform-oci-fk-vcn` | v0.3.0 | VCN, subnets, route tables, IGW, NAT and SGW |
+| `terraform-oci-fk-nsg` | v0.2.0 | Bastion, database and Data Guard security policy |
+| `terraform-oci-fk-compute` | v0.3.0 | OL9 bastion, 1 OCPU and 8 GB RAM |
 | `terraform-oci-fk-basedb` | local `../..` | Database system and Data Guard creation paths |
 
-The local BaseDB source supports development before its first release. External consumers should pin a published release when available. VCN v0.2.1, compartment v0.1.1 and DRG v0.4.1 support OCI `>= 6.0.0, < 10.0.0`; this example explicitly requires OCI `>= 9.12.1, < 10.0.0`. Local dependency overrides are no longer required. Initialization, validation and a read-only plan passed on 2026-11-12 using the published dependencies and OCI 9.12.1. No apply was run for this dependency verification.
+The local BaseDB source exercises this checkout. External consumers should pin a published BaseDB release. Dependency versions are listed above and require OCI `>= 9.12.1, < 10.0.0` and OpenTofu `>= 1.11.0`. No local dependency overrides are required. Historical live results below refer to the versions deployed at that time; the updated pins have initialization and configuration validation only.
 
 ---
 
@@ -312,6 +312,8 @@ Initialization downloads the required modules and providers. Validation checks c
 
 ## 🧹 Cleanup
 
+First record `standby_db_system_id` and `standby_region_hint` from the root outputs. Follow [Destroying a Data Guard standby](../../README.md#destroying-a-data-guard-standby), including target-region verification and the recovery sequence. The optional CLI cleanup is disabled by default. Never remove state entries to hide surviving resources.
+
 ```sh
 tofu plan -destroy
 tofu destroy
@@ -319,7 +321,7 @@ tofu destroy
 
 Cleanup completed on **2026-11-09**: the saved destroy plan removed **27 resources** in **40m3s**, leaving **zero managed resources in state**. Standby/Data Guard deletion took **23m4s**, followed by primary deletion in **16m41s**. OCI cleanup checks found **no non-terminated DB systems or compute instances, no VCNs, no remaining block or boot volumes across Frankfurt AD-1/2/3, and no database or boot-volume backups** in the deployment compartment. The compartment was retained by design (`enable_delete = false`).
 
-Destroy removes example networking, compute and databases; lab data is deleted. Deleting the Data Guard association deletes the standby DB Home/system (`delete_standby_db_home_on_delete = true`). The child compartment remains in OCI because `enable_delete = false`; account for it before a subsequent deployment. Copy required data before cleanup.
+Destroy removes example networking, compute and databases; lab data is deleted. The provider attempts standby system termination with `delete_standby_db_home_on_delete = true`; verify actual termination. The child compartment remains in OCI because `enable_delete = false`; account for it before a subsequent deployment. Copy required data before cleanup.
 
 ---
 

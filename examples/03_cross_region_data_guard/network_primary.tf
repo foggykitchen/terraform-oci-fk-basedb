@@ -1,5 +1,5 @@
 module "network_primary" {
-  source                   = "git::https://github.com/foggykitchen/terraform-oci-fk-vcn.git?ref=v0.2.1"
+  source                   = "git::https://github.com/foggykitchen/terraform-oci-fk-vcn.git?ref=v0.3.0"
   providers                = { oci = oci }
   compartment_ocid         = module.compartment.compartment_id
   name                     = "${var.name_prefix}-primary-vcn"
