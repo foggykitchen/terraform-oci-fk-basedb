@@ -2,6 +2,8 @@
 
 ## v0.2.0 — Unreleased
 
+- Add example 04: PRIMARY with an existing Vault/AES-256 key, metadata checks, optional scoped IAM through policy v0.2.0 and cleanup that leaves shared Vault/key/secrets outside managed state. Follows ADB lesson 7; no Vault import or secret-content retrieval.
+
 - Document the provider 9.x cross-region standby deletion limitation. `NewDbSystem` deletion attempts whole-system termination using the association's primary-region client; missing-resource error handling can clear state without terminating the remote peer. The delete implementation is unchanged across the reviewed 9.12.1, 9.13.0 and 9.14.0 tags. The exact HTTP error in the historical failed runs remains unverified.
 - Add `standby_db_system_id` and caller-supplied `standby_region_hint` outputs for pre-destroy inventory.
 - Add optional `standby_cleanup = { enabled = false, oci_cli_profile = null }`. A STANDBY-only metadata resource stores the destroy hook. When enabled, it uses OCI CLI in the explicit target region, verifies the peer is still STANDBY, terminates it and verifies TERMINATED before association teardown. Errors fail the destroy. No CLI operations occur by default.

@@ -1,6 +1,6 @@
 # OCI BaseDB with Terraform/OpenTofu - Training Examples
 
-This directory contains three deployment examples for the **terraform-oci-fk-basedb** module. They progress from a single private database to same-region Data Guard and then cross-region Data Guard with private network peering.
+This directory contains four deployment examples for the **terraform-oci-fk-basedb** module. They progress from a single private database to same-region Data Guard and then cross-region Data Guard with private network peering; example 04 separately demonstrates customer-managed encryption with an existing Vault and key.
 
 These examples are part of the **[FoggyKitchen.com training ecosystem](https://foggykitchen.com/courses-2/)** and focus on database infrastructure, private access, availability and regional disaster recovery.
 
@@ -15,6 +15,7 @@ Each example creates its own child compartment, networking, security groups, Ora
 | 01 | [**Single Primary**](01_single_primary/README.md) | Private BaseDB system, DB Home, database and PDB; public bastion; private listener access |
 | 02 | [**Same-Region Data Guard**](02_same_region_data_guard/README.md) | Primary and physical standby in one VCN; AD/FD placement; asynchronous redo transport |
 | 03 | [**Cross-Region Data Guard**](03_cross_region_data_guard/README.md) | Two regional VCNs; DRGs and RPC peering; bidirectional routes; provider aliases; remote standby |
+| 04 | [**Single Primary with CMK**](04_single_primary_with_cmk/README.md) | Existing Vault and AES-256 key, scoped IAM, private BaseDB primary |
 
 Read them in order to build on the concepts. **Deploy each independently**: example 02 does not reuse resources or state from example 01, and example 03 does not upgrade example 02.
 
@@ -29,6 +30,8 @@ Read them in order to build on the concepts. **Deploy each independently**: exam
 | DRGs / RPCs | None | None | Two / two |
 | Database edition configured | Standard Edition | Enterprise Edition | Enterprise Edition |
 | Active Data Guard | Not applicable | Disabled | Disabled |
+
+Example 04 has the same single-primary topology as 01 and additionally reads an existing Vault/key and optionally creates lab-owned IAM. The Vault/key and existing secrets are outside the example’s managed state.
 
 ---
 
@@ -57,7 +60,7 @@ From the repository root, select **one** example:
 cd examples/01_single_primary
 ```
 
-Or choose `examples/02_same_region_data_guard` or `examples/03_cross_region_data_guard` from the repository root. Then prepare and deploy it:
+Or choose `examples/02_same_region_data_guard` or `examples/03_cross_region_data_guard`, or select `examples/04_single_primary_with_cmk` for an existing-key CMK deployment from the repository root. Then prepare and deploy it:
 
 ```sh
 cp terraform.tfvars.example terraform.tfvars

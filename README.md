@@ -41,7 +41,7 @@ LICENSE             UPL 1.0
 
 The examples create their full network and access infrastructure with pinned FoggyKitchen compartment, VCN, NSG and compute modules. The cross-region example adds two DRG/RPC stacks based on the FoggyKitchen landing zone pattern. Supply tenancy/parent context and credentials; no pre-existing deployment subnet IDs are needed. Examples require OpenTofu >= 1.11.
 
-See [single primary](examples/01_single_primary/), [same-region Data Guard](examples/02_same_region_data_guard/) and [cross-region Data Guard](examples/03_cross_region_data_guard/).
+See [single primary](examples/01_single_primary/), [same-region Data Guard](examples/02_same_region_data_guard/), [cross-region Data Guard](examples/03_cross_region_data_guard/) and [single primary with an existing CMK](examples/04_single_primary_with_cmk/).
 
 ```hcl
 module "primary" {
@@ -127,6 +127,8 @@ A `terraform_data.standby_cleanup` metadata resource is present only for STANDBY
 The dependency on the association orders this hook before association, primary and dependent network destruction. It resumes waiting for a `TERMINATING` system and accepts an explicitly observed `TERMINATED` system. Work-request waiting and lifecycle polling each have a two-hour limit. Every CLI error (including 404), unexpected role/state and timeout fails the destroy; errors are never ignored. Investigate permissions, region and the actual inventory before retrying. Do not remove the module block, taint the helper or use `create_before_destroy` to bypass a destroy provisioner. Replacing the helper or its peer system can also invoke cleanup, so review replacement plans carefully. This opt-in path has static and stub-CLI validation only; no live cleanup was performed for v0.2.0.
 
 ## Customer-managed encryption keys
+
+See [example 04](examples/04_single_primary_with_cmk/) for a complete deployment consuming an existing Vault and key, following the ADB Vault lesson without importing shared resources into the lab state.
 
 For PRIMARY, set both `kms_key_id` and `vault_id`, or leave both null for Oracle-managed encryption. Optional `kms_key_version_id` selects a CDB key version; it requires the pair. These map to `db_home.database` fields verified in the [provider 9.12.1 schema](https://github.com/oracle/terraform-provider-oci/blob/v9.12.1/internal/service/database/database_db_system_resource.go#L272-L335). They are creation-time (`ForceNew`) fields: changing them can replace an existing system. This interface is not an in-place key migration/rotation workflow.
 

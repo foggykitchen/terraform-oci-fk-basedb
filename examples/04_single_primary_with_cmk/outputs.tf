@@ -1,0 +1,12 @@
+output "compartment_id" { value = module.compartment.compartment_id }
+output "primary_vcn_id" { value = module.network_primary.vcn_id }
+output "primary_bastion_public_ip" { value = module.bastion_primary.instance_public_ip }
+output "primary_db_system_id" { value = module.primary.db_system_id }
+output "primary_database_id" { value = module.primary.database_id }
+output "primary_private_ips" { value = module.primary.private_ips }
+output "primary_connection_strings" { value = module.primary.connection_strings }
+output "cmk_vault_id" { value = data.oci_kms_vault.existing.id }
+output "cmk_key_id" { value = data.oci_kms_key.existing.id }
+output "cmk_requested_key_version_id" { value = var.kms_key_version_id }
+output "cmk_dynamic_group_id" { value = module.vault_iam.dynamic_group_id }
+output "cmk_policy_ids" { value = module.vault_iam.policy_ids }
