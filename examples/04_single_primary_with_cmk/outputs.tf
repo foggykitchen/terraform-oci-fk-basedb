@@ -13,5 +13,5 @@ output "primary_connection_strings" { value = module.primary.connection_strings 
 output "cmk_vault_id" { value = data.oci_kms_vault.existing.id }
 output "cmk_key_id" { value = data.oci_kms_key.existing.id }
 output "cmk_requested_key_version_id" { value = var.kms_key_version_id }
-output "cmk_dynamic_group_id" { value = module.vault_iam.dynamic_group_id }
+output "cmk_dynamic_group_id" { value = module.vault_group.dynamic_group_id }
 output "cmk_policy_ids" { value = module.vault_iam.policy_ids }

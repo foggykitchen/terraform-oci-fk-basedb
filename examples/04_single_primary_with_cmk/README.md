@@ -35,7 +35,7 @@ By default, `iam.tf` creates a uniquely named dynamic group matching resources i
 
 The group covers the lab compartment, not only one resource OCID. Keep unrelated workloads out of this compartment. A dedicated existing BaseDB key in the shared Vault is preferable to reusing the key that encrypts unrelated secrets: database operations may create key versions, and `manage keys` is broader than encrypt/decrypt. This configuration does not itself rotate or schedule deletion of the shared key.
 
-Set `create_vault_iam = false` only when equivalent IAM for the lab compartment is already administered externally. No existing policies are adopted or edited. Do not switch this flag off after deployment unless equivalent permissions are already effective: doing so plans deletion of the lab-owned IAM resources. `depends_on` orders policy creation before BaseDB, but does not guarantee IAM propagation has completed. Confirm effective permissions before provisioning; a successful static validation cannot establish that.
+Set `create_vault_iam = false` only when equivalent IAM for the lab compartment is already administered externally. No existing policies are adopted or edited. Do not switch this flag off after deployment unless equivalent permissions are already effective: doing so plans deletion of the lab-owned IAM resources. Separate instances of policy v0.2.0 create the dynamic group first and then bind policy statements to its OCID. This establishes an explicit dependency and avoids creating a name-based policy before the group exists. A `moved` block preserves the existing dynamic group in state. `depends_on` orders policy creation before BaseDB, but does not guarantee IAM propagation has completed. Confirm effective permissions before provisioning; a successful static validation cannot establish that.
 
 ## Files and inputs
 
@@ -100,7 +100,7 @@ Keep the key available for any retained database backups and other consumers. Ve
 
 ## Validation status
 
-`tofu init -backend=false`, `tofu validate` and `tofu fmt -check -recursive` passed with OpenTofu 1.11.6 and OCI provider 9.15.0. These are configuration checks; no real-input plan or OCI metadata readiness check was performed. No live apply, SQL verification, CMK assignment verification or destroy has been performed for this example. This scenario does not test cross-region key replication or Data Guard with CMK.
+`tofu init -backend=false`, `tofu validate` and `tofu fmt -check -recursive` passed with OpenTofu 1.11.6 and OCI provider 9.15.0. These are configuration checks; no real-input plan or OCI metadata readiness check was performed. A live apply on 2026-11-27 created networking, IAM, Bastion Service and the private client, whose Bastion plugin reported RUNNING. The DB System failed after approximately 37.5 minutes with DCS-10353 / DBT-16015 during KMS key validation. KMS audit recorded a GetKey request by the DB System principal returning HTTP 404 at 10:46:55 UTC; the same key metadata was readable by the deployment identity. This points to authorization as a leading cause but does not prove the exact IAM failure. The original apply log also showed the name-based policy completing before dynamic-group creation; the OCID/dependency correction addresses that ordering hazard and is not yet live-verified. SQL verification and successful CMK assignment remain pending. No destroy was performed. This scenario does not test cross-region key replication or Data Guard with CMK.
 
 ## License
 
