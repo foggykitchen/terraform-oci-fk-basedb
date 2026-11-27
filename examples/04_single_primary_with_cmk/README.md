@@ -8,6 +8,8 @@ A secret containing an ADB password is not a TDE master key. This example never 
 
 ![Private BaseDB with an existing Vault key and OCI Bastion Service](04_single_primary_with_cmk_architecture.jpg)
 
+*Figure 1. Single-region BaseDB with an existing Vault key, private client and database subnets, and access through OCI Bastion Service.*
+
 - A dedicated lab compartment and VCN with two private subnets: client and Bastion endpoint `10.40.0.0/24`, and database `10.40.1.0/24`.
 - An Oracle Linux 9 client with no public IP, reached through OCI Bastion Service from `admin_cidr`. No Internet Gateway; NAT and Service Gateway provide outbound connectivity.
 - The client subnet security list allows TCP/22 egress within that subnet for the Bastion endpoint. This additive rule also applies to the client VNIC. Client NSG ingress allows SSH only from the endpoint's /32. Database NSG ingress allows TCP/22 and TCP/1521 only from the client NSG.
@@ -98,7 +100,7 @@ After explicit cleanup approval, review `tofu plan -destroy` and run the approve
 
 Keep the key available for any retained database backups and other consumers. Verify the shared Vault/key remain ACTIVE/ENABLED and that unrelated ADB resources still have their own IAM access. No key disable/delete/rotation or secret-content reads are part of this lab's cleanup.
 
-## Validation status
+## 🖥️ OCI Console and Runtime Verification
 
 Validated with OpenTofu 1.11.6 and OCI provider 9.15.0. Initialization, validation and recursive formatting passed.
 
@@ -119,7 +121,7 @@ Live checks on 2026-11-27:
 | Wallet inspection | OKV rows OPEN for CON_ID 1, 2 and 3; accompanying FILE/AUTOLOGIN rows report OPEN_NO_MASTER_KEY |
 | Final plan | No changes. Your infrastructure matches the configuration. |
 
-The successful retry confirms KMS access and CMK assignment with the corrected IAM configuration. It does not isolate name binding/creation ordering from IAM propagation as the sole cause of the first failure. OCI created a key version during database provisioning, as expected; the key itself remains outside lab-managed state.
+The successful retry confirms KMS access and CMK assignment with the corrected IAM configuration. It does not isolate name binding/creation ordering from IAM propagation as the sole cause of the first failure. OCI created key versions during database provisioning, as expected; the key itself remains outside lab-managed state.
 
 The initial generated SYS password was also rejected before DB provisioning because OCI required at least two special characters; the locally supplied password was corrected before the first DB System creation. Passwords and runtime state/plan artifacts are not included in this repository.
 
@@ -143,6 +145,42 @@ CON_ID  STATUS              WALLET_TYPE  WRL_TYPE
 ```
 
 The lab remains deployed. The temporary Managed SSH session expires after one hour; that does not shut down the database or client. Full lab cleanup remains pending. This scenario does not test cross-region key replication or Data Guard with CMK.
+
+## 📸 OCI Console Screenshots
+
+Captured from the verified example 04 deployment in Frankfurt on **2026-11-27**. These screenshots show the successful replacement DB System and the existing shared Vault/key. Runtime checks above provide the SSH, listener and SQL evidence.
+
+![Private regional subnets — example 04](04_single_primary_with_cmk_vcn_subnets.jpg)
+
+*Figure 2. VCN subnets. Both regional subnets are private and Available: client/Bastion endpoint `10.40.0.0/24` and database `10.40.1.0/24`.*
+
+![Private compute client — example 04](04_single_primary_with_cmk_private_client.jpg)
+
+*Figure 3. Private client. The instance is Running in the lab compartment on VM.Standard.E4.Flex; OCI Console confirms that it cannot be accessed directly from the Internet because it resides in a private subnet.*
+
+![Active OCI Bastion Managed SSH session — example 04](04_single_primary_with_cmk_bastion_session.jpg)
+
+*Figure 4. Bastion session. The Active Managed SSH session targets the private client on TCP/22 as `opc`, with a one-hour TTL. This is a point-in-time capture; sessions expire independently of the client and database.*
+
+![Available BaseDB system — example 04](04_single_primary_with_cmk_db_system.jpg)
+
+*Figure 5. DB System. The successful replacement is Available in Frankfurt AD-1, using VM.BaseDB.x86, 4 ECPUs, Standard Edition and 256 GB data storage, with the private database subnet and database NSG.*
+
+![Database encryption with the existing Vault key — example 04](04_single_primary_with_cmk_database_encryption.jpg)
+
+*Figure 6. Database encryption. FOGGYDB is Available on version 23.26.4.0.0 and references the existing `FoggyKitchenMasterEnryptionKey` in its Encryption section. Automatic backups and Data Guard are disabled in this standalone lab.*
+
+![Existing enabled AES-256 Vault key — example 04](04_single_primary_with_cmk_vault_key.jpg)
+
+*Figure 7. Existing key. The Enabled AES-256 key uses Software protection in `FoggyKitchenVault`; its 2023 creation date confirms that the key predates this lab. The Vault and key are not managed by the lab state.*
+
+![Vault key versions after BaseDB provisioning — example 04](04_single_primary_with_cmk_vault_key_versions.jpg)
+
+*Figure 8. Key versions. The existing 2023 version remains Enabled alongside two versions created during the successful database provisioning at 11:39 and 11:40 UTC. KMS audit independently records successful CreateKeyVersion activity by the DB System principal.*
+
+![CMK IAM policy referencing the dynamic-group OCID — example 04](04_single_primary_with_cmk_iam_policy.jpg)
+
+*Figure 9. IAM policy. The Active `fk-basedb-04-cmk-policy` references the dynamic-group OCID and grants `use vaults` and `manage keys`. The console clips the ends of these long statements; [iam.tf](iam.tf) contains the complete conditions restricting access to the selected Vault/key.*
 
 ## License
 
