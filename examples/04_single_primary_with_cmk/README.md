@@ -6,6 +6,8 @@ A secret containing an ADB password is not a TDE master key. This example never 
 
 ## Architecture
 
+![Private BaseDB with an existing Vault key and OCI Bastion Service](04_single_primary_with_cmk_architecture.jpg)
+
 - A dedicated lab compartment and VCN with two private subnets: client and Bastion endpoint `10.40.0.0/24`, and database `10.40.1.0/24`.
 - An Oracle Linux 9 client with no public IP, reached through OCI Bastion Service from `admin_cidr`. No Internet Gateway; NAT and Service Gateway provide outbound connectivity.
 - The client subnet security list allows TCP/22 egress within that subnet for the Bastion endpoint. This additive rule also applies to the client VNIC. Client NSG ingress allows SSH only from the endpoint's /32. Database NSG ingress allows TCP/22 and TCP/1521 only from the client NSG.
