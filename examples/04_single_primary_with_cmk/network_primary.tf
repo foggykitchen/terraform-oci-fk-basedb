@@ -9,6 +9,8 @@ module "network_primary" {
   create_nat_gateway      = true
   create_service_gateway  = true
   security_lists = {
+    # Shared with the client VNIC: only SSH egress within the client subnet.
+    # Client ingress remains restricted to the endpoint /32 by its NSG.
     bastion_endpoint = {
       display_name  = "Bastion endpoint SSH egress"
       ingress_rules = []
@@ -27,22 +29,12 @@ module "network_primary" {
     }
   }
   subnets = {
-    bastion_endpoint = {
-      cidr_block                    = local.primary_endpoint_cidr
-      display_name                  = "fk-bastion-endpoint-private"
-      dns_label                     = "endpoint"
-      route_table_key               = "private"
-      security_list_keys            = ["bastion_endpoint"]
-      include_default_security_list = false
-      prohibit_public_ip_on_vnic    = true
-      prohibit_internet_ingress     = true
-    }
     client = {
       cidr_block                    = local.primary_client_cidr
       display_name                  = "fk-client-subnet-private"
       dns_label                     = "client"
       route_table_key               = "private"
-      security_list_keys            = ["nsg_only"]
+      security_list_keys            = ["bastion_endpoint"]
       include_default_security_list = false
       prohibit_public_ip_on_vnic    = true
       prohibit_internet_ingress     = true

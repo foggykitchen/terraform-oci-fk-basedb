@@ -3,7 +3,7 @@ module "bastion_service" {
   source                       = "git::https://github.com/foggykitchen/terraform-oci-fk-bastion-service.git?ref=v0.2.0"
   compartment_ocid             = module.compartment.compartment_id
   name                         = "${replace(var.name_prefix, "-", "")}bastion"
-  target_subnet_id             = module.network_primary.subnet_ids["bastion_endpoint"]
+  target_subnet_id             = module.network_primary.subnet_ids["client"]
   client_cidr_block_allow_list = [var.admin_cidr]
   max_session_ttl_in_seconds   = 10800
   create_session               = false

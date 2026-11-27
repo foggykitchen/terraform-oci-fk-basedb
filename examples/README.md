@@ -31,7 +31,7 @@ Read them in order to build on the concepts. **Deploy each independently**: exam
 | Database edition configured | Standard Edition | Enterprise Edition | Enterprise Edition |
 | Active Data Guard | Not applicable | Disabled | Disabled |
 
-Example 04 has one primary and a private client reached through OCI Bastion Service, with three private subnets and no Internet Gateway or public compute IP. It also reads an existing Vault/key and optionally creates lab-owned IAM. The Vault/key and existing secrets are outside the example’s managed state.
+Example 04 has one primary and a private client reached through OCI Bastion Service, with two private subnets (client with Bastion endpoint, and database) and no Internet Gateway or public compute IP. It also reads an existing Vault/key and optionally creates lab-owned IAM. The Vault/key and existing secrets are outside the example’s managed state.
 
 ---
 

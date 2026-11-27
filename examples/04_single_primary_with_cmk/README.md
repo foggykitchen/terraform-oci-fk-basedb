@@ -6,9 +6,9 @@ A secret containing an ADB password is not a TDE master key. This example never 
 
 ## Architecture
 
-- A dedicated lab compartment and VCN with three private subnets: client `10.40.0.0/24`, database `10.40.1.0/24`, and Bastion endpoint `10.40.2.0/24`.
+- A dedicated lab compartment and VCN with two private subnets: client and Bastion endpoint `10.40.0.0/24`, and database `10.40.1.0/24`.
 - An Oracle Linux 9 client with no public IP, reached through OCI Bastion Service from `admin_cidr`. No Internet Gateway; NAT and Service Gateway provide outbound connectivity.
-- Bastion endpoint security-list egress allows only TCP/22 to the client subnet. Client NSG ingress allows SSH only from the endpoint's /32. Database NSG ingress allows TCP/22 and TCP/1521 only from the client NSG.
+- The client subnet security list allows TCP/22 egress within that subnet for the Bastion endpoint. This additive rule also applies to the client VNIC. Client NSG ingress allows SSH only from the endpoint's /32. Database NSG ingress allows TCP/22 and TCP/1521 only from the client NSG.
 - One VM.BaseDB.x86 primary, 4 ECPUs, 256 GB data storage, Standard Edition and LVM by default.
 - Read-only Vault/key metadata lookups in `primary_region`; no Vault, key, key-version or secret resources in this state.
 - An optional lab-owned dynamic group and scoped IAM policy in the tenancy home region.
@@ -66,7 +66,7 @@ The root module's nested CMK fields are `ForceNew` in the provider. Changing the
 
 ## Private access through OCI Bastion Service
 
-The access path is `administrator → OCI Bastion Service → private client → private BaseDB`. There is no public SSH address on the client or database. The endpoint occupies its own private subnet; default security lists are excluded from all subnets. HTTPS egress allows client updates and agent communication through NAT/Service Gateway.
+The access path is `administrator → OCI Bastion Service → private client → private BaseDB`. There is no public SSH address on the client or database. The Bastion endpoint shares the client subnet. Its security list supplies SSH egress because the service endpoint is not attached to the client NSG. Security-list and NSG rules are additive: the shared list also permits client SSH egress within that subnet, but grants no ingress. Client SSH ingress remains restricted to the endpoint /32 in its NSG. Default security lists are excluded from both subnets. HTTPS egress allows client updates and agent communication through NAT/Service Gateway.
 
 1. Deploy only after approval, initially keeping `create_session = false`. The compute configuration requests the Oracle Cloud Agent **Bastion** plugin to be ENABLED. In OCI Console, open the client instance's Oracle Cloud Agent tab and wait until that plugin actually reports **RUNNING**. ENABLED is desired configuration, not readiness. The deployment identity also needs Bastion/session permissions; see [OCI Bastion prerequisites](https://docs.oracle.com/en-us/iaas/Content/Bastion/Tasks/managingbastions.htm).
 2. Once RUNNING, set `create_session = true`, review a fresh plan and apply it only with deployment approval. This example uses explicit staging instead of the orchestrator's fixed 600-second wait: a delay alone cannot prove plugin readiness. The session targets the private client as `opc` using the first supplied SSH key (or the generated lab key).
