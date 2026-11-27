@@ -144,7 +144,11 @@ CON_ID  STATUS              WALLET_TYPE  WRL_TYPE
 3       OPEN                 OKV          OKV
 ```
 
-The lab remains deployed. The temporary Managed SSH session expires after one hour; that does not shut down the database or client. Full lab cleanup remains pending. This scenario does not test cross-region key replication or Data Guard with CMK.
+The owner-approved full lab cleanup completed on 2026-11-27. OpenTofu reported 27 resources destroyed and the state contains zero resources; the compartment remains ACTIVE because `enable_delete = false`. A fresh destroy plan reports no changes. OCI inventory confirms the DB System and client are TERMINATED, the Bastion is DELETED, and no active DB systems, compute instances, VCNs, block/boot volumes (all three Frankfurt ADs), database backups, lab policy or dynamic group remain. The existing Vault is ACTIVE and its key ENABLED.
+
+Cleanup exposed a client-NSG ordering hazard: the original configuration allowed client rules to be deleted before the Managed SSH session finished. During this run, the former HTTPS egress and endpoint-only SSH ingress were temporarily restored through OCI CLI; both were removed with the NSG at final teardown. The session completed deletion after 17m36s. This recovery does not prove that rule removal was the sole cause of the delay. `compute_primary.tf` now explicitly depends on the complete client NSG module, preserving its rules until the session and client are destroyed. The dependency correction passes validation, but a fresh deployment/destroy cycle with that correction has not been repeated. No automatic CLI cleanup hook was added for Bastion.
+
+This scenario does not test cross-region key replication or Data Guard with CMK.
 
 ## 📸 OCI Console Screenshots
 

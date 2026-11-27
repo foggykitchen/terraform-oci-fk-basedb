@@ -20,4 +20,7 @@ module "client_primary" {
     plugins_config           = [{ name = "Bastion", desired_state = "ENABLED" }]
   }
   user_data = filebase64("${path.module}/cloud-init.yaml")
+
+  # Preserve agent connectivity until the session and client are destroyed.
+  depends_on = [module.client_nsg_primary]
 }
