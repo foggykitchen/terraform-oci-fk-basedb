@@ -100,7 +100,49 @@ Keep the key available for any retained database backups and other consumers. Ve
 
 ## Validation status
 
-`tofu init -backend=false`, `tofu validate` and `tofu fmt -check -recursive` passed with OpenTofu 1.11.6 and OCI provider 9.15.0. These are configuration checks; no real-input plan or OCI metadata readiness check was performed. A live apply on 2026-11-27 created networking, IAM, Bastion Service and the private client, whose Bastion plugin reported RUNNING. The DB System failed after approximately 37.5 minutes with DCS-10353 / DBT-16015 during KMS key validation. KMS audit recorded a GetKey request by the DB System principal returning HTTP 404 at 10:46:55 UTC; the same key metadata was readable by the deployment identity. This points to authorization as a leading cause but does not prove the exact IAM failure. The original apply log also showed the name-based policy completing before dynamic-group creation; the OCID/dependency correction addresses that ordering hazard and is not yet live-verified. SQL verification and successful CMK assignment remain pending. No destroy was performed. This scenario does not test cross-region key replication or Data Guard with CMK.
+Validated with OpenTofu 1.11.6 and OCI provider 9.15.0. Initialization, validation and recursive formatting passed.
+
+Live checks on 2026-11-27:
+
+| Check | Result |
+|---|---|
+| Initial DB creation | FAILED after approximately 37.5 minutes: DCS-10353 / DBT-16015, KMS validation |
+| Initial KMS audit | GetKey by the DB System principal returned HTTP 404 at 10:46:55 UTC; the deployment identity could read the same enabled AES-256 key |
+| IAM correction | Policy references the dynamic-group OCID; explicit dependency orders group before policy. Existing group preserved using a moved block; policy updated in place |
+| Approved replacement | Previous DB System TERMINATED; removal took 5m36s, replacement creation took 45m26s; apply succeeded with 1 added / 1 destroyed |
+| Replacement KMS audit | GetKey returned HTTP 200 at 11:37:59 UTC; CreateKeyVersion returned HTTP 200 at 11:39:35 UTC |
+| DB System / database | Both AVAILABLE; database API returned the selected existing Vault and key OCIDs |
+| Private client | RUNNING, no public IP; Bastion plugin RUNNING |
+| Bastion access | Managed SSH session ACTIVE; SSH to the private client passed |
+| Private listener | TCP/1521 reachable from client to DB node |
+| SQL | FOGGYDB PRIMARY / READ WRITE; FKPDB1 READ WRITE; PDB$SEED READ ONLY |
+| Wallet inspection | OKV rows OPEN for CON_ID 1, 2 and 3; accompanying FILE/AUTOLOGIN rows report OPEN_NO_MASTER_KEY |
+| Final plan | No changes. Your infrastructure matches the configuration. |
+
+The successful retry confirms KMS access and CMK assignment with the corrected IAM configuration. It does not isolate name binding/creation ordering from IAM propagation as the sole cause of the first failure. OCI created a key version during database provisioning, as expected; the key itself remains outside lab-managed state.
+
+The initial generated SYS password was also rejected before DB provisioning because OCI required at least two special characters; the locally supplied password was corrected before the first DB System creation. Passwords and runtime state/plan artifacts are not included in this repository.
+
+SQL checks used `sudo -iu oracle sqlplus -s / as sysdba` on the private DB node, reached through the client and OCI Bastion Service. This verifies local OS authentication; it does not establish password-based application authentication over the listener. Observed SQL results (spacing normalized):
+
+```text
+NAME     DATABASE_ROLE  OPEN_MODE
+FOGGYDB  PRIMARY        READ WRITE
+
+NAME      OPEN_MODE
+PDB$SEED  READ ONLY
+FKPDB1    READ WRITE
+
+CON_ID  STATUS              WALLET_TYPE  WRL_TYPE
+1       OPEN_NO_MASTER_KEY   AUTOLOGIN    FILE
+1       OPEN                 OKV          OKV
+2       OPEN_NO_MASTER_KEY   AUTOLOGIN    FILE
+2       OPEN                 OKV          OKV
+3       OPEN_NO_MASTER_KEY   AUTOLOGIN    FILE
+3       OPEN                 OKV          OKV
+```
+
+The lab remains deployed. The temporary Managed SSH session expires after one hour; that does not shut down the database or client. Full lab cleanup remains pending. This scenario does not test cross-region key replication or Data Guard with CMK.
 
 ## License
 
