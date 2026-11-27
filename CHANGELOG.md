@@ -2,7 +2,7 @@
 
 ## v0.2.0 — Unreleased
 
-- Add example 04: PRIMARY with an existing Vault/AES-256 key, metadata checks, optional scoped IAM through policy v0.2.0 and cleanup that leaves shared Vault/key/secrets outside managed state. Follows ADB lesson 7; no Vault import or secret-content retrieval.
+- Add example 04: PRIMARY with an existing Vault/AES-256 key, metadata checks, optional scoped IAM through policy v0.2.0 and cleanup that leaves shared Vault/key/secrets outside managed state. Follows ADB lesson 7; no Vault import or secret-content retrieval. Uses private compute and OCI Bastion Service v0.2.0, three private subnets, no public IP/Internet Gateway, and staged Managed SSH sessions after plugin readiness verification.
 
 - Document the provider 9.x cross-region standby deletion limitation. `NewDbSystem` deletion attempts whole-system termination using the association's primary-region client; missing-resource error handling can clear state without terminating the remote peer. The delete implementation is unchanged across the reviewed 9.12.1, 9.13.0 and 9.14.0 tags. The exact HTTP error in the historical failed runs remains unverified.
 - Add `standby_db_system_id` and caller-supplied `standby_region_hint` outputs for pre-destroy inventory.

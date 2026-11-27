@@ -15,3 +15,7 @@ kms_key_id = "ocid1.key.oc1.eu-frankfurt-1.replace_me"
 # kms_key_version_id = "ocid1.keyversion.oc1.eu-frankfurt-1.replace_me"
 # Set false only if suitable IAM for the new lab compartment already exists.
 create_vault_iam = true
+
+# Stage session creation only after the client Bastion plugin is RUNNING.
+create_session = false
+session_ttl_in_seconds = 3600

@@ -22,7 +22,7 @@ variable "primary_availability_domain" {
   default     = null
 }
 variable "admin_cidr" {
-  description = "Trusted public IPv4 CIDR allowed to SSH to the bastion, for example your public IP /32."
+  description = "Trusted public IPv4 CIDR allowed to connect through OCI Bastion Service, for example your public IP /32."
   type        = string
   validation {
     condition     = can(cidrhost(var.admin_cidr, 0)) && can(regex("^[0-9.]+/[0-9]+$", var.admin_cidr)) && try(tonumber(split("/", var.admin_cidr)[1]) > 0, false)
@@ -39,7 +39,7 @@ variable "admin_password" {
   sensitive   = true
 }
 variable "ssh_public_keys" {
-  description = "Existing SSH public keys; an empty list generates a lab key stored in state."
+  description = "Existing SSH public keys; the first is used for the Bastion session. An empty list generates a lab key stored in state."
   type        = list(string)
   default     = []
 }
@@ -108,4 +108,22 @@ variable "create_vault_iam" {
   type        = bool
   default     = true
   nullable    = false
+}
+
+variable "create_session" {
+  description = "Create a temporary Managed SSH session only after the client Bastion plugin reports RUNNING."
+  type        = bool
+  default     = false
+  nullable    = false
+}
+
+variable "session_ttl_in_seconds" {
+  description = "Managed SSH session lifetime, between 30 minutes and 3 hours."
+  type        = number
+  default     = 3600
+  nullable    = false
+  validation {
+    condition     = var.session_ttl_in_seconds >= 1800 && var.session_ttl_in_seconds <= 10800 && floor(var.session_ttl_in_seconds) == var.session_ttl_in_seconds
+    error_message = "Session TTL must be an integer between 1800 and 10800 seconds."
+  }
 }

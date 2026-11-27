@@ -128,7 +128,7 @@ The dependency on the association orders this hook before association, primary a
 
 ## Customer-managed encryption keys
 
-See [example 04](examples/04_single_primary_with_cmk/) for a complete deployment consuming an existing Vault and key, following the ADB Vault lesson without importing shared resources into the lab state.
+See [example 04](examples/04_single_primary_with_cmk/) for a complete deployment with private compute and OCI Bastion Service consuming an existing Vault and key, following the ADB Vault lesson without importing shared resources into the lab state.
 
 For PRIMARY, set both `kms_key_id` and `vault_id`, or leave both null for Oracle-managed encryption. Optional `kms_key_version_id` selects a CDB key version; it requires the pair. These map to `db_home.database` fields verified in the [provider 9.12.1 schema](https://github.com/oracle/terraform-provider-oci/blob/v9.12.1/internal/service/database/database_db_system_resource.go#L272-L335). They are creation-time (`ForceNew`) fields: changing them can replace an existing system. This interface is not an in-place key migration/rotation workflow.
 

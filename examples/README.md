@@ -4,7 +4,7 @@ This directory contains four deployment examples for the **terraform-oci-fk-base
 
 These examples are part of the **[FoggyKitchen.com training ecosystem](https://foggykitchen.com/courses-2/)** and focus on database infrastructure, private access, availability and regional disaster recovery.
 
-Each example creates its own child compartment, networking, security groups, Oracle Linux 9 bastion and BaseDB resources. You provide tenancy and parent-compartment context, OCI authentication, SSH public keys, a trusted administrator CIDR, a database version and the SYS password.
+Each example creates its own child compartment, networking, security groups, Oracle Linux 9 access host and BaseDB resources. You provide tenancy and parent-compartment context, OCI authentication, SSH public keys, a trusted administrator CIDR, a database version and the SYS password.
 
 ---
 
@@ -15,7 +15,7 @@ Each example creates its own child compartment, networking, security groups, Ora
 | 01 | [**Single Primary**](01_single_primary/README.md) | Private BaseDB system, DB Home, database and PDB; public bastion; private listener access |
 | 02 | [**Same-Region Data Guard**](02_same_region_data_guard/README.md) | Primary and physical standby in one VCN; AD/FD placement; asynchronous redo transport |
 | 03 | [**Cross-Region Data Guard**](03_cross_region_data_guard/README.md) | Two regional VCNs; DRGs and RPC peering; bidirectional routes; provider aliases; remote standby |
-| 04 | [**Single Primary with CMK**](04_single_primary_with_cmk/README.md) | Existing Vault and AES-256 key, scoped IAM, private BaseDB primary |
+| 04 | [**Single Primary with CMK**](04_single_primary_with_cmk/README.md) | Existing Vault and AES-256 key, scoped IAM, private client/BaseDB, OCI Bastion Service |
 
 Read them in order to build on the concepts. **Deploy each independently**: example 02 does not reuse resources or state from example 01, and example 03 does not upgrade example 02.
 
@@ -31,7 +31,7 @@ Read them in order to build on the concepts. **Deploy each independently**: exam
 | Database edition configured | Standard Edition | Enterprise Edition | Enterprise Edition |
 | Active Data Guard | Not applicable | Disabled | Disabled |
 
-Example 04 has the same single-primary topology as 01 and additionally reads an existing Vault/key and optionally creates lab-owned IAM. The Vault/key and existing secrets are outside the example’s managed state.
+Example 04 has one primary and a private client reached through OCI Bastion Service, with three private subnets and no Internet Gateway or public compute IP. It also reads an existing Vault/key and optionally creates lab-owned IAM. The Vault/key and existing secrets are outside the example’s managed state.
 
 ---
 
@@ -52,7 +52,7 @@ Each directory contains:
 - Service-specific Terraform/OpenTofu configuration (`.tf`).
 - A README with architecture, inputs, outputs, deployment and verification steps.
 - A `terraform.tfvars.example` input template.
-- A `cloud-init.yaml` payload that installs `nmap-ncat` on the bastion.
+- A `cloud-init.yaml` payload that installs `nmap-ncat` on the access host.
 
 From the repository root, select **one** example:
 
@@ -97,7 +97,7 @@ Initialization downloads the required modules and providers. Validation checks c
 
 - One example teaches one deployment scenario and owns its own state.
 - Each deployment composes dedicated FoggyKitchen modules for compartment, VCN, NSGs, compute and BaseDB; example 03 also uses the DRG module.
-- Public access is limited to bastion SSH from a trusted administrator CIDR. Database nodes use private addressing.
+- Examples 01–03 restrict public bastion SSH to a trusted administrator CIDR. Example 04 uses OCI Bastion Service with a trusted client allow list and private compute. Database nodes always use private addressing.
 - Configuration is separated by service and, where applicable, region.
 - External modules use release tags; the BaseDB source is local (`../..`) so the examples exercise this checkout.
 - Runtime verification distinguishes network access, database login and replication health.
