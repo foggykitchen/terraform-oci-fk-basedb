@@ -1,5 +1,5 @@
 module "bastion_primary" {
-  source                   = "git::https://github.com/foggykitchen/terraform-oci-fk-compute.git?ref=v0.2.2"
+  source                   = "git::https://github.com/foggykitchen/terraform-oci-fk-compute.git?ref=v0.3.0"
   providers                = { oci = oci }
   compartment_ocid         = module.compartment.compartment_id
   tenancy_ocid             = var.tenancy_ocid

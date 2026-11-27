@@ -1,0 +1,17 @@
+output "compartment_id" { value = module.compartment.compartment_id }
+output "primary_vcn_id" { value = module.network_primary.vcn_id }
+output "primary_client_id" { value = module.client_primary.instance_id }
+output "primary_client_private_ip" { value = module.client_primary.instance_private_ip }
+output "bastion_id" { value = module.bastion_service.bastion_id }
+output "bastion_private_endpoint_ip" { value = module.bastion_service.bastion_private_endpoint_ip_address }
+output "session_id" { value = try(oci_bastion_session.client[0].id, null) }
+output "session_ssh_command" { value = try(oci_bastion_session.client[0].ssh_metadata["command"], null) }
+output "primary_db_system_id" { value = module.primary.db_system_id }
+output "primary_database_id" { value = module.primary.database_id }
+output "primary_private_ips" { value = module.primary.private_ips }
+output "primary_connection_strings" { value = module.primary.connection_strings }
+output "cmk_vault_id" { value = data.oci_kms_vault.existing.id }
+output "cmk_key_id" { value = data.oci_kms_key.existing.id }
+output "cmk_requested_key_version_id" { value = var.kms_key_version_id }
+output "cmk_dynamic_group_id" { value = module.vault_group.dynamic_group_id }
+output "cmk_policy_ids" { value = module.vault_iam.policy_ids }

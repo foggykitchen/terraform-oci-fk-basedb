@@ -1,6 +1,6 @@
 # Based on the FoggyKitchen Landing Zone Orchestrator drg_cross_region pattern.
 module "drg_primary" {
-  source           = "git::https://github.com/foggykitchen/terraform-oci-fk-drg.git?ref=v0.4.1"
+  source           = "git::https://github.com/foggykitchen/terraform-oci-fk-drg.git?ref=v0.5.0"
   providers        = { oci = oci }
   compartment_ocid = module.compartment.compartment_id
   name             = "${var.name_prefix}-primary-drg"

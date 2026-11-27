@@ -42,3 +42,13 @@ output "data_guard_role" {
   description = "Observed role of the standby-side peer. Null when this module does not manage an association."
   value       = local.is_primary ? null : oci_database_data_guard_association.this[0].peer_role
 }
+
+output "standby_db_system_id" {
+  description = "Association peer_db_system_id for pre-destroy inventory; null for PRIMARY. Verify the current database role before termination."
+  value       = local.is_primary ? null : oci_database_data_guard_association.this[0].peer_db_system_id
+}
+
+output "standby_region_hint" {
+  description = "Caller-supplied region of the standby, not provider-discovered. The caller must match it to oci.target. Null for PRIMARY or when omitted."
+  value       = local.is_primary ? null : var.standby_region_hint
+}

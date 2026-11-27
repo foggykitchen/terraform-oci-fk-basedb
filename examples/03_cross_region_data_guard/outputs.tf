@@ -7,7 +7,7 @@ output "primary_db_system_id" { value = module.primary.db_system_id }
 output "primary_database_id" { value = module.primary.database_id }
 output "primary_private_ips" { value = module.primary.private_ips }
 output "primary_connection_strings" { value = module.primary.connection_strings }
-output "standby_db_system_id" { value = module.standby.db_system_id }
+output "standby_db_system_id" { value = module.standby.standby_db_system_id }
 output "standby_database_id" { value = module.standby.database_id }
 output "standby_private_ips" { value = module.standby.private_ips }
 output "standby_connection_strings" { value = module.standby.connection_strings }
@@ -18,3 +18,5 @@ output "primary_remote_peering_connection_ids" { value = module.drg_primary.remo
 output "standby_drg_id" { value = module.drg_standby.drg_id }
 output "standby_drg_route_table_ids" { value = module.drg_standby.drg_route_table_ids }
 output "standby_remote_peering_connection_ids" { value = module.drg_standby.remote_peering_connection_ids }
+
+output "standby_region_hint" { value = module.standby.standby_region_hint }

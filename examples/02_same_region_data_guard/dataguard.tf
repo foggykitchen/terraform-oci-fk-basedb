@@ -3,6 +3,7 @@ module "standby" {
   source              = "../.."
   providers           = { oci = oci, oci.target = oci }
   role                = "STANDBY"
+  standby_region_hint = var.primary_region
   primary_database_id = module.primary.database_id
   compartment_id      = module.compartment.compartment_id
   availability_domain = local.standby_ad

@@ -296,13 +296,13 @@ variable "is_active_data_guard_enabled" {
 }
 
 variable "delete_standby_db_home_on_delete" {
-  description = "Destroy behavior for the association. OCI 6.37 supports true only: destroying the association deletes the standby DB Home/system."
+  description = "Provider 9.x requires true in state. NewDbSystem deletion attempts standby system termination through the association provider; cross-region termination is not guaranteed. See README cleanup guidance."
   type        = bool
   default     = true
   nullable    = false
   validation {
     condition     = var.delete_standby_db_home_on_delete
-    error_message = "OCI supports only delete_standby_db_home_on_delete = true. Destroying the association deletes the standby DB Home/system."
+    error_message = "OCI provider 9.x supports only delete_standby_db_home_on_delete = true; verify actual standby termination separately."
   }
 }
 
@@ -324,4 +324,66 @@ variable "defined_tags" {
   type        = map(string)
   default     = {}
   nullable    = false
+}
+
+variable "kms_key_id" {
+  description = "Optional PRIMARY TDE master key OCID. Set together with vault_id; null uses Oracle-managed keys. Changes can replace the DB system."
+  type        = string
+  default     = null
+  validation {
+    condition     = (var.kms_key_id == null) == (var.vault_id == null)
+    error_message = "kms_key_id and vault_id must both be null or both be set."
+  }
+  validation {
+    condition     = var.kms_key_id == null ? true : can(regex("^ocid1\\.key\\.", var.kms_key_id))
+    error_message = "kms_key_id must be a key OCID or null."
+  }
+}
+
+variable "vault_id" {
+  description = "Optional PRIMARY OCI Vault OCID containing kms_key_id. Cross-region Data Guard requires the key replicated to the standby region."
+  type        = string
+  default     = null
+  validation {
+    condition     = var.vault_id == null ? true : can(regex("^ocid1\\.vault\\.", var.vault_id))
+    error_message = "vault_id must be a vault OCID or null."
+  }
+}
+
+variable "kms_key_version_id" {
+  description = "Optional PRIMARY TDE key version OCID; requires kms_key_id and vault_id. Null selects the current key version. Creation-time setting, not key rotation."
+  type        = string
+  default     = null
+  validation {
+    condition     = var.kms_key_version_id == null ? true : var.kms_key_id != null && var.vault_id != null && length(trimspace(var.kms_key_version_id)) > 0
+    error_message = "kms_key_version_id requires kms_key_id and vault_id and must not be empty."
+  }
+}
+
+variable "standby_region_hint" {
+  description = "Caller-supplied standby region name, matching oci.target; not inferred from the provider alias. Optional inventory hint; required when standby_cleanup.enabled is true."
+  type        = string
+  default     = null
+  validation {
+    condition     = var.standby_region_hint == null ? true : can(regex("^[a-z][a-z0-9-]+$", var.standby_region_hint))
+    error_message = "standby_region_hint must be an OCI region name or null."
+  }
+}
+
+variable "standby_cleanup" {
+  description = "Opt-in STANDBY destroy-time CLI termination. Requires Bash, OCI CLI, target-region permissions and a prior approved state update. Disabled by default; see README lifecycle caveats."
+  type = object({
+    enabled         = optional(bool, false)
+    oci_cli_profile = optional(string)
+  })
+  default  = {}
+  nullable = false
+  validation {
+    condition     = !var.standby_cleanup.enabled || (var.role == "STANDBY" && var.standby_region_hint != null)
+    error_message = "Enabled standby_cleanup requires role STANDBY and an explicit standby_region_hint matching oci.target."
+  }
+  validation {
+    condition     = var.standby_cleanup.oci_cli_profile == null ? true : length(trimspace(var.standby_cleanup.oci_cli_profile)) > 0
+    error_message = "oci_cli_profile must be null or a non-empty OCI CLI profile name."
+  }
 }

@@ -38,13 +38,13 @@ NSG rules and routes are separate controls: an open TCP path does not prove data
 
 | Module | Release | Purpose |
 |---|---|---|
-| `terraform-oci-fk-compartment` | v0.1.1 | Child compartment in the tenancy home region |
-| `terraform-oci-fk-vcn` | v0.2.1 | VCN, subnets, route tables, IGW, NAT and SGW |
-| `terraform-oci-fk-nsg` | v0.1.0 | Bastion and database security policy |
-| `terraform-oci-fk-compute` | v0.2.2 | OL9 bastion, 1 OCPU and 8 GB RAM |
+| `terraform-oci-fk-compartment` | v0.2.0 | Child compartment in the tenancy home region |
+| `terraform-oci-fk-vcn` | v0.3.0 | VCN, subnets, route tables, IGW, NAT and SGW |
+| `terraform-oci-fk-nsg` | v0.2.0 | Bastion and database security policy |
+| `terraform-oci-fk-compute` | v0.3.0 | OL9 bastion, 1 OCPU and 8 GB RAM |
 | `terraform-oci-fk-basedb` | local `../..` | Primary DB system, DB Home, database and PDB |
 
-The local BaseDB source supports development before its first release. External consumers should pin a published release when available. All other module sources are pinned to release tags.
+The local BaseDB source exercises this checkout. External consumers should pin a published BaseDB release. Dependency versions are listed above and require OCI `>= 9.12.1, < 10.0.0` and OpenTofu `>= 1.11.0`. No local dependency overrides are required. Historical live results below refer to the versions deployed at that time; the updated pins have initialization and configuration validation only.
 
 ---
 

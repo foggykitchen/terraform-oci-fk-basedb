@@ -1,5 +1,5 @@
 module "bastion_nsg_standby" {
-  source           = "git::https://github.com/foggykitchen/terraform-oci-fk-nsg.git?ref=v0.1.0"
+  source           = "git::https://github.com/foggykitchen/terraform-oci-fk-nsg.git?ref=v0.2.0"
   providers        = { oci = oci.standby }
   compartment_ocid = module.compartment.compartment_id
   vcn_id           = module.network_standby.vcn_id
@@ -15,7 +15,7 @@ module "bastion_nsg_standby" {
   ]
 }
 module "database_nsg_standby" {
-  source           = "git::https://github.com/foggykitchen/terraform-oci-fk-nsg.git?ref=v0.1.0"
+  source           = "git::https://github.com/foggykitchen/terraform-oci-fk-nsg.git?ref=v0.2.0"
   providers        = { oci = oci.standby }
   compartment_ocid = module.compartment.compartment_id
   vcn_id           = module.network_standby.vcn_id

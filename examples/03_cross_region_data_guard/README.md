@@ -77,14 +77,14 @@ The Data Guard rules follow [Oracle BaseDB Data Guard prerequisites](https://doc
 
 | Module | Release | Purpose |
 |---|---|---|
-| `terraform-oci-fk-compartment` | v0.1.1 | Child compartment in the tenancy home region |
-| `terraform-oci-fk-vcn` | v0.2.1 | VCN, subnets, route tables, IGW, NAT and SGW |
-| `terraform-oci-fk-nsg` | v0.1.0 | Bastion, database and Data Guard security policy |
-| `terraform-oci-fk-compute` | v0.2.2 | OL9 bastion, 1 OCPU and 8 GB RAM |
-| `terraform-oci-fk-drg` | v0.4.1 | Two regional DRGs, RPCs and explicit routing |
+| `terraform-oci-fk-compartment` | v0.2.0 | Child compartment in the tenancy home region |
+| `terraform-oci-fk-vcn` | v0.3.0 | VCN, subnets, route tables, IGW, NAT and SGW |
+| `terraform-oci-fk-nsg` | v0.2.0 | Bastion, database and Data Guard security policy |
+| `terraform-oci-fk-compute` | v0.3.0 | OL9 bastion, 1 OCPU and 8 GB RAM |
+| `terraform-oci-fk-drg` | v0.5.0 | Two regional DRGs, RPCs and explicit routing |
 | `terraform-oci-fk-basedb` | local `../..` | Database system and Data Guard creation paths |
 
-The local BaseDB source supports development before its first release. External consumers should pin a published release when available. VCN v0.2.1, compartment v0.1.1 and DRG v0.4.1 support OCI `>= 6.0.0, < 10.0.0`; this example explicitly requires OCI `>= 9.12.1, < 10.0.0`. Local dependency overrides are no longer required. Initialization, validation and a read-only plan passed on 2026-11-12 using the published dependencies and OCI 9.12.1. No apply was run for this dependency verification.
+The local BaseDB source exercises this checkout. External consumers should pin a published BaseDB release. Dependency versions are listed above and require OCI `>= 9.12.1, < 10.0.0` and OpenTofu `>= 1.11.0`. No local dependency overrides are required. Historical live results below refer to the versions deployed at that time; the updated pins have initialization and configuration validation only.
 
 ---
 
@@ -391,12 +391,14 @@ Initialization downloads the required modules and providers. Validation checks c
 
 ## 🧹 Cleanup
 
+First record `standby_db_system_id` and `standby_region_hint` from the root outputs. Follow [Destroying a Data Guard standby](../../README.md#destroying-a-data-guard-standby), including target-region verification and the recovery sequence. The optional CLI cleanup is disabled by default. Never remove state entries to hide surviving resources.
+
 ```sh
 tofu plan -destroy
 tofu destroy
 ```
 
-Destroy removes example networking, compute and databases; lab data is deleted. The association is configured with `delete_standby_db_home_on_delete = true`, but the **2026-11-12 cross-region cleanup required an explicit standby termination in Amsterdam**: the provider reported association destruction complete after 1 second while the standby DB system, database and association remained AVAILABLE. The first destroy consequently failed: standby NSG/subnet deletion was blocked by its VNIC, and OCI refused to terminate the primary while its Data Guard standby still existed. The standby's exact DB system OCID was checked against the saved destroy plan and its compartment/name verified before submitting termination through the standby-region OCI API, which returned TERMINATING. This is an observed cleanup limitation; the provider's root cause has not been established.
+Destroy removes example networking, compute and databases; lab data is deleted. The association is configured with `delete_standby_db_home_on_delete = true`, but the **2026-11-12 cross-region cleanup required an explicit standby termination in Amsterdam**: the provider reported association destruction complete after 1 second while the standby DB system, database and association remained AVAILABLE. The first destroy consequently failed: standby NSG/subnet deletion was blocked by its VNIC, and OCI refused to terminate the primary while its Data Guard standby still existed. The standby's exact DB system OCID was checked against the saved destroy plan and its compartment/name verified before submitting termination through the standby-region OCI API, which returned TERMINATING. Provider source review for v0.2.0 identified primary-region termination requests and missing-resource error suppression as a mechanism consistent with this failure; the original HTTP response was not captured.
 
 The child compartment remains in OCI because `enable_delete = false`; account for it before a subsequent deployment. Copy required data before cleanup. After destroy, check that state has no managed resources and inspect **both regions** for remaining DB systems, instances, VCNs, block/boot volumes and backups. Do not treat association removal from state as proof that the remote DB system has been deleted. If this behavior recurs, verify the exact standby system from the destroy plan, terminate it in the target region, and rerun a fresh destroy plan for any remaining managed resources after termination completes.
 
